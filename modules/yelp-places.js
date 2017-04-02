@@ -11,7 +11,7 @@ const yelpSecret = config.yelpClientSecret;
 
 
 const searchRequest = {
-    term:'',
+    categories:'',
     latitude: null,
     longitude: null,
     radius: null
@@ -21,7 +21,7 @@ var places = function (req) {
     searchRequest.latitude = req.latitude;
     searchRequest.longitude = req.longitude;
     searchRequest.radius = req.radius;
-    searchRequest.term = req.types;
+    searchRequest.categories = req.types;
 
     return yelp.accessToken(yelpId, yelpSecret).then(function (resp) {
         const client = yelp.client(resp.jsonBody.access_token);

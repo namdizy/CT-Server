@@ -5,7 +5,6 @@ const express = require('express');
 const router = express.Router();
 const yelpPlaces = require('../modules/yelp-places')
 
-/* GET users listing. */
 router.get('/places', function(req, res, next) {
     yelpPlaces.places(req.query).then(function (response) {
         res.send(response);
