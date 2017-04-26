@@ -4,10 +4,26 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var mongoose = require('mongoose');
+var flash = require('connect-flash');
+var session = require('express-session');
+require('./models/Users');
+require('./models/FoodTrucks');
+require('./models/CheckIns');
+require('./models/Reviews');
+require('./models/Comments');
+require('./models/Posts');
+require('./models/Pins');
+
+mongoose.connect('mongodb://localhost/cornertruck');
+require('./config/passport')(passport);
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 var api = require('./routes/api');
+var auth = require('./routes/authenticate');
 
 var app = express();
 
@@ -23,10 +39,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(session({secret: 'mysecret'}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+
 app.use('/', index);
 app.use('/users', users);
 app.use('/api', api);
-
+app.use('/auth', auth);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
