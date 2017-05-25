@@ -2,6 +2,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var mongoose = require('mongoose');
 var User = mongoose.model('User');
+var FoodTruck = mongoose.model('FoodTruck');
 var bcrypt = require('bcrypt');
 
 module.exports = function() {
@@ -41,6 +42,31 @@ module.exports = function() {
                 return done(null, user);
             });
         }));
+
+        //Login Strategy
+    passport.use('local-food-truck-login', new LocalStrategy({
+        username: 'username',
+        password: 'password',
+        passReqToCallback: true
+    },
+        function(req, username, password, done){
+            FoodTruck.findOne({'username': username},
+            function(err, foodTruck){
+                if(err){
+                    return done(err);
+                }
+                if(!foodTruck){
+                    console.log('Food Truck Not Found with username: ' + username);
+                    return done(null, false);
+                }
+                if(!isValidPassword(foodTruck, password)){
+                    console.log('Invalid Password');
+                    return done(null, false);
+                }
+
+                return done(null, foodTruck);
+            });
+        }));
     
     //Signup Strategy
     passport.use('local-signup', new LocalStrategy({
@@ -75,6 +101,45 @@ module.exports = function() {
                             console.log('Password: ' + newUser.password);
                             newUser.token = newUser.generateJWT();
                             return done(null, newUser);
+                        });
+                    }
+                });
+            });
+        }));
+
+        //Signup Strategy
+    passport.use('local--food-truck-signup', new LocalStrategy({
+        username: 'username',
+        password: 'password',
+        passReqToCallback: true,
+    },
+        function(req, username, password, done){
+            process.nextTick(function(){
+                FoodTruck.findOne({'username': username}, function(err, user){
+                    if(err){
+                        console.log('Error in Signup: ' + err);
+                        return done(null, false);
+                    }
+                    if(user){
+                        console.log('Food Truck already exists with username: ' + username);
+                        return done(null, false);
+                    } else {
+                        //if there is no user create one
+                        var newFoodTruck = new FoodTruck();
+
+                        newFoodTruck.username = username;
+                        newFoodTruck.password = newFoodTruck.generateHash(password);
+
+                        //save new user
+                        newFoodTruck.save(function(err){
+                            if(err){
+                                console.log('Error in saving food truck: ' + err);
+                                throw err;
+                            }
+                            console.log(newUser.username + ' Registration successful');
+                            console.log('Password: ' + newUser.password);
+                            newFoodTruck.token = newFoodTruck.generateJWT();
+                            return done(null, newFoodTruck);
                         });
                     }
                 });

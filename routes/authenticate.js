@@ -70,10 +70,10 @@ router.post('/login/foodTruck', function(req, res, next){
         return res.status(400).json({ message: 'Please fill out all fields'});
     }
 
-    passport.authenticate('local-login', function(err, foodTruck, info){
+    passport.authenticate('local-food-truck-login', function(err, foodTruck, info){
         if(err) {return next(err);}
 
-        if(user){
+        if(foodTruck){
             return res.json({token: foodTruck.generateJWT()});
         } else {
             return res.status(401).json(info);
